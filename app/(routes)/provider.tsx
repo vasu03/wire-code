@@ -41,9 +41,9 @@ const PlaygroundProvider = ({ children }: Readonly<{ children: React.ReactNode }
     return (
         <SidebarProvider>
             <AppSidebar />
-            <div className="w-full flex flex-col border border-red-500">
+            <div className="w-full flex flex-col">
                 <AppHeader />
-                <div className="p-8 h-full border border-green-500">
+                <div className="p-4 md:p-6 h-full">
                     <PageHeader title={"Convert your Wireframes into Code"} />
                     {children}
                 </div>

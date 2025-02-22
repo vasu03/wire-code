@@ -39,7 +39,7 @@ const ProfileAvatar = () => {
         <div>
             <Popover >
                 <PopoverTrigger>
-                    {user?.user?.photoURL && <Image src={user?.user?.photoURL} alt="profile" className="w-[35px] h-[35px] rounded-full" />}
+                    {user?.user?.photoURL && <img src={user?.user?.photoURL} width={20} height={20} alt="profile" className="w-[35px] h-[35px] rounded-full" />}
                 </PopoverTrigger>
                 <PopoverContent className="w-[150px] p-0 border border-input flex items-center justify-center relative right-6">
                     <Button variant={"ghost"} onClick={onButtonPress} className="w-full">Logout</Button>
