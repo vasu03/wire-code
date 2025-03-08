@@ -8,11 +8,11 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import ProfileAvatar from "./ProfileAvatar";
 
 // Creating a global App header component
-const AppHeader = () => {
+const AppHeader = ({ hideSidebar = false }) => {
     // TSX to render the component
     return (
         <div className="p-3 shadow-sm flex items-center justify-between w-full">
-            <SidebarTrigger />
+            {!hideSidebar && <SidebarTrigger />}
             <ProfileAvatar />
         </div>
     );

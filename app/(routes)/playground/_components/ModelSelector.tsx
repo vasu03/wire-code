@@ -1,5 +1,6 @@
 // Importing required modules
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";
 import uuid4 from "uuid4";
@@ -11,14 +12,18 @@ import { useAuthContext } from "@/app/provider";
 // Importing custom firebase configs
 import { storage } from "@/configs/firebaseConfig";
 
+// Importing custom data constants
+import Constants from "@/data/Constants";
+
 // Importing UI components
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Importing Icons
-import { Wand2Icon } from "lucide-react";
+import { Loader2, Wand2Icon } from "lucide-react";
 
+// Defining the props for the ModelSelector component
 type ModelSelectorProps = {
     imgFile: File | null;
 };
@@ -27,30 +32,18 @@ type ModelSelectorProps = {
 const ModelSelector: React.FC<ModelSelectorProps> = ({ imgFile }) => {
     // Get the current user information
     const { user } = useAuthContext();
+    // Hook to navigate through the app
+    const router = useRouter();
 
     // A List of AI models available to work with
-    const AIModelsList = [
-        {
-            name: "Deepseek R1",
-            value: "deepseek",
-            icon: "/deepseek.png"
-        },
-        {
-            name: "Google Gemini",
-            value: "gemini",
-            icon: "/google.png"
-        },
-        {
-            name: "Meta Llama",
-            value: "llama",
-            icon: "/meta.png"
-        }
-    ];
+    const AIModelsList = Constants?.AIModelsList;
 
     // State variable to store the name of selected AI model
     const [aiModel, setAiModel] = useState<string>();
     // State variable to store the extra description for code generation
     const [genDescription, setGenDescription] = useState<string>();
+    // State variable to store the loading status
+    const [loading, setLoading] = useState<boolean>(false);
 
     // function to handle the code generation action
     const handleCodeGeneration = async () => {
@@ -64,6 +57,9 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ imgFile }) => {
             console.error("No description provided.");
             return;
         }
+
+        // set the loading status to true to indicate that the code generation is in progress
+        setLoading(true);
 
         try {
             // upload the image file to Firebase storage
@@ -79,16 +75,20 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ imgFile }) => {
             const generatedUid = uuid4()
 
             // Save the data into Database
-            const result = await axios.post("/api/code-generation", {
+            const response = await axios.post("/api/code-generation", {
                 uid: generatedUid,
                 imgUrl: imageUrl,
                 aiModel: aiModel,
                 description: genDescription,
                 email: user?.email
-            })
+            });
 
-            console.log(result.data);
+            // set the loading status to false to indicate that the code generation is completed
+            setLoading(false);
+            // redirect to the view-code page to display the generated code
+            router.push(`/view-code/${generatedUid}`);
         } catch (error) {
+            setLoading(false);
             console.error("File upload failed:", error);
         }
     };
@@ -120,9 +120,11 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ imgFile }) => {
                     <span className="text-gray-600 dark:text-gray-300">Enter your Description</span>
                     <Textarea onChange={(e) => setGenDescription(e.target.value)} placeholder="Describe your requirements..." rows={9} className="resize-none" />
                 </div>
-                <Button onClick={handleCodeGeneration}>
-                    <Wand2Icon />
-                    Generate Code
+                <Button onClick={handleCodeGeneration} disabled={loading}>
+                    {loading ?
+                        (<Loader2 className="mr-2 h-4 w-4 animate-spin" />) :
+                        (<><Wand2Icon /><span>Generate Code</span></>)
+                    }
                 </Button>
             </div>
         </section>
